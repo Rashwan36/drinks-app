@@ -282,9 +282,13 @@
 
   // ---- live updates ----
   function connect() {
-    var es = new EventSource('/api/events');
-    es.addEventListener('order', function (e) { var o = JSON.parse(e.data); if (order && o.id === order.id) showOrder(o); });
-    es.addEventListener('menu', loadMenu);
+    // Check the tracked order's status every few seconds while the page is open.
+    setInterval(function () {
+      if (document.hidden || !order || ['new', 'prep', 'ready'].indexOf(order.status) < 0) return;
+      var id = order.id;
+      api('GET', '/api/orders/' + id).then(function (o) { if (order && order.id === id && o.status !== order.status) showOrder(o); }).catch(function () {});
+    }, 5000);
+    document.addEventListener('visibilitychange', function () { if (!document.hidden) loadMenu(); });
   }
 
   loadMenu().then(function () {

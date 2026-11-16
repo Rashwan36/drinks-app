@@ -143,24 +143,33 @@
     var i = orders.findIndex(function (x) { return x.id === o.id; });
     if (['new', 'prep', 'ready'].indexOf(o.status) < 0) { if (i >= 0) orders.splice(i, 1); }
     else if (i >= 0) orders[i] = o; else orders.push(o);
+    lastChange = Date.now();
     render();
   }
-  function loadOrders() { return fetch('/api/orders').then(function (r) { return r.json(); }).then(function (l) { orders = l; render(); }); }
-
-  function connect() {
-    var es = new EventSource('/api/events');
-    es.onopen = function () { $('liveDot').classList.remove('off'); $('liveText').textContent = 'Live · new orders appear instantly'; loadOrders(); };
-    es.onerror = function () { $('liveDot').classList.add('off'); $('liveText').textContent = 'Reconnecting…'; };
-    es.addEventListener('order', function (e) {
-      var o = JSON.parse(e.data), isNew = o.status === 'new' && !orders.some(function (x) { return x.id === o.id; });
-      if (isNew) { freshIds[o.id] = true; setTimeout(function () { delete freshIds[o.id]; }, 4000); beep(); }
-      upsert(o);
-    });
+  // Poll for orders: every 5s while busy, every 15s after 10 quiet minutes (keeps the free database quota low).
+  var lastChange = Date.now(), first = true;
+  function setLive(ok) { $('liveDot').classList.toggle('off', !ok); $('liveText').textContent = ok ? 'Live · checking for new orders' : 'Reconnecting…'; }
+  function schedule() { setTimeout(poll, Date.now() - lastChange < 600000 ? 5000 : 15000); }
+  function poll() {
+    if (document.hidden) return schedule();
+    fetch('/api/orders', { cache: 'no-store' }).then(function (r) { if (!r.ok) throw new Error(); return r.json(); }).then(function (l) {
+      setLive(true);
+      var known = {}, changed = l.length !== orders.length, ding = false;
+      orders.forEach(function (o) { known[o.id] = o.status; });
+      l.forEach(function (o) {
+        if (!(o.id in known)) {
+          changed = true;
+          if (!first && o.status === 'new') { ding = true; freshIds[o.id] = true; setTimeout(function () { delete freshIds[o.id]; }, 4000); }
+        } else if (known[o.id] !== o.status) changed = true;
+      });
+      if (ding) beep();
+      if (changed) lastChange = Date.now();
+      orders = l; first = false; render();
+    }).catch(function () { setLive(false); }).then(schedule);
   }
-  renderSound(); loadOrders(); connect();
+  document.addEventListener('visibilitychange', function () { if (!document.hidden) lastChange = Date.now(); });
+  renderSound(); poll();
   setInterval(render, 30000);
-  // Keeps free cloud hosting awake while this screen is open.
-  setInterval(function () { fetch('/api/ping').catch(function () {}); }, 10 * 60000);
 })();
 </script>
 </body>
