@@ -1,0 +1,167 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0C0A09">
+<title>Kitchen — Orders</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root { --bg:#1C1917; --head:#0C0A09; --card:#292524; --line:#3F3A36; --text:#FAFAF9; --muted:#D6D3D1; --accent:#F97316; --green:#22C55E; }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; background: var(--bg); color: var(--text); font-family: 'IBM Plex Sans', system-ui, -apple-system, sans-serif; -webkit-tap-highlight-color: transparent; }
+  button { font-family: inherit; }
+  header { background: var(--head); padding: 28px 20px 22px; border-radius: 0 0 28px 28px; margin-bottom: 18px; }
+  .head-inner { max-width: 1400px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+  .eyebrow { margin: 0; font-size: 13px; font-weight: 600; color: #FDBA74; letter-spacing: .5px; text-transform: uppercase; }
+  h1 { margin: 4px 0; font-size: 26px; }
+  .status { margin: 0; font-size: 13px; color: var(--muted); display: flex; align-items: center; gap: 6px; }
+  .live { width: 8px; height: 8px; border-radius: 4px; background: var(--green); }
+  .live.off { background: #F87171; }
+  .icon-btn { width: 48px; height: 48px; border-radius: 24px; border: 1px solid var(--line); background: var(--card); display: flex; align-items: center; justify-content: center; cursor: pointer; flex-shrink: 0; }
+  .wrap { max-width: 1400px; margin: 0 auto; padding: 0 20px 32px; }
+  .tabs { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 4px; padding: 4px; background: var(--card); border-radius: 14px; margin-bottom: 16px; max-width: 520px; }
+  .tab { height: 44px; border-radius: 10px; border: none; font-size: 15px; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px; background: transparent; color: #E7E5E4; }
+  .tab[aria-selected="true"] { background: var(--accent); color: var(--bg); }
+  .badge { min-width: 22px; height: 22px; border-radius: 11px; font-size: 12px; font-weight: 700; display: inline-flex; align-items: center; justify-content: center; padding: 0 6px; background: var(--line); color: var(--text); }
+  .tab[aria-selected="true"] .badge { background: var(--bg); }
+  .list { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 12px; }
+  .order { background: var(--card); border: 1px solid var(--line); border-radius: 18px; padding: 16px; display: flex; flex-direction: column; gap: 14px; }
+  .order.fresh { animation: flash 1.2s ease-out 3; }
+  @keyframes flash { 0% { box-shadow: 0 0 0 0 rgba(249,115,22,.9); } 100% { box-shadow: 0 0 0 14px rgba(249,115,22,0); } }
+  .top { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
+  .desk-label { font-size: 13px; color: var(--muted); text-transform: uppercase; letter-spacing: .5px; }
+  .desk { font-size: 48px; font-weight: 700; line-height: 1; }
+  .chip { font-size: 13px; font-weight: 700; padding: 4px 10px; border-radius: 8px; background: var(--line); color: #E7E5E4; }
+  .chip.warn { background: #45360F; color: #FCD34D; } .chip.late { background: #4A1D1F; color: #FCA5A5; }
+  .no { font-size: 12px; color: var(--muted); }
+  .items { display: flex; flex-direction: column; gap: 10px; padding-top: 12px; border-top: 1px solid var(--line); }
+  .it { display: flex; align-items: flex-start; gap: 10px; }
+  .qty { min-width: 36px; height: 28px; border-radius: 8px; background: var(--line); font-size: 15px; font-weight: 700; display: flex; align-items: center; justify-content: center; }
+  .it .name { font-size: 17px; font-weight: 600; } .it .detail { font-size: 13px; color: var(--muted); }
+  .act { height: 52px; border-radius: 14px; font-size: 16px; font-weight: 700; cursor: pointer; border: none; color: var(--bg); }
+  .act.new { background: var(--accent); } .act.prep { background: var(--green); } .act.ready { background: #F5F5F4; }
+  .act:disabled { opacity: .6; }
+  .empty { grid-column: 1 / -1; display: flex; flex-direction: column; align-items: center; gap: 8px; padding: 64px 0; text-align: center; }
+  .empty p { margin: 0; }
+  .start { position: fixed; inset: 0; background: rgba(12,10,9,.92); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 16px; z-index: 20; padding: 24px; text-align: center; }
+  .start button { height: 56px; padding: 0 32px; border-radius: 16px; border: none; background: var(--accent); color: var(--bg); font-size: 17px; font-weight: 700; cursor: pointer; }
+  .hidden { display: none !important; }
+</style>
+</head>
+<body>
+<header>
+  <div class="head-inner">
+    <div>
+      <p class="eyebrow">Kitchen</p>
+      <h1>Orders</h1>
+      <p class="status"><span class="live" id="liveDot"></span><span id="liveText">Connecting…</span></p>
+    </div>
+    <button class="icon-btn" type="button" id="soundBtn" aria-label="Mute alerts"></button>
+  </div>
+</header>
+<div class="wrap">
+  <div class="tabs" role="tablist">
+    <button class="tab" role="tab" data-tab="new" aria-selected="true">New <span class="badge" id="c-new">0</span></button>
+    <button class="tab" role="tab" data-tab="prep" aria-selected="false">Preparing <span class="badge" id="c-prep">0</span></button>
+    <button class="tab" role="tab" data-tab="ready" aria-selected="false">Ready <span class="badge" id="c-ready">0</span></button>
+  </div>
+  <div class="list" id="list" aria-live="polite"></div>
+</div>
+
+<div class="start" id="start">
+  <svg aria-hidden="true" width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="#FDBA74" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg>
+  <p style="margin:0;font-size:20px;font-weight:700">Ready to take orders?</p>
+  <p style="margin:0;color:var(--muted);font-size:14px;max-width:320px">Tap start so the screen can play a sound when a new order comes in.</p>
+  <button type="button" id="startBtn">Start</button>
+</div>
+
+<script>
+(function () {
+  var orders = [], tab = 'new', sound = true, audio = null, freshIds = {};
+  var $ = function (id) { return document.getElementById(id); };
+  function esc(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
+  try { sound = localStorage.getItem('kitchenSound') !== 'off'; } catch (e) {}
+  var NEXT = { new: 'prep', prep: 'ready', ready: 'done' };
+  var LABEL = { new: 'Start preparing', prep: 'Mark ready', ready: 'Delivered' };
+  var BELL_ON = '<svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#FAFAF9" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg>';
+  var BELL_OFF = '<svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#D6D3D1" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M8.7 3A6 6 0 0 1 18 8c0 2.9.5 4.9 1.2 6.3"/><path d="M17 17H3s3-2 3-9c0-.8.1-1.5.4-2.2"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/><path d="M2 2l20 20"/></svg>';
+
+  function renderSound() { $('soundBtn').innerHTML = sound ? BELL_ON : BELL_OFF; $('soundBtn').setAttribute('aria-label', sound ? 'Mute alerts' : 'Unmute alerts'); }
+  $('soundBtn').onclick = function () { sound = !sound; try { localStorage.setItem('kitchenSound', sound ? 'on' : 'off'); } catch (e) {} renderSound(); };
+  function beep() {
+    if (!sound || !audio) return;
+    [0, 0.25].forEach(function (t, i) {
+      var o = audio.createOscillator(), g = audio.createGain();
+      o.frequency.value = i ? 1046 : 784; o.type = 'sine';
+      g.gain.setValueAtTime(0.0001, audio.currentTime + t);
+      g.gain.exponentialRampToValueAtTime(0.4, audio.currentTime + t + 0.02);
+      g.gain.exponentialRampToValueAtTime(0.0001, audio.currentTime + t + 0.22);
+      o.connect(g); g.connect(audio.destination); o.start(audio.currentTime + t); o.stop(audio.currentTime + t + 0.25);
+    });
+    if (navigator.vibrate) navigator.vibrate([150, 80, 150]);
+  }
+  $('startBtn').onclick = function () {
+    try { audio = new (window.AudioContext || window.webkitAudioContext)(); } catch (e) {}
+    $('start').classList.add('hidden');
+    if ('wakeLock' in navigator) navigator.wakeLock.request('screen').catch(function () {});
+  };
+
+  function minutes(o) { return Math.floor((Date.now() - o.createdAt) / 60000); }
+  function render() {
+    ['new', 'prep', 'ready'].forEach(function (s) { $('c-' + s).textContent = orders.filter(function (o) { return o.status === s; }).length; });
+    var list = orders.filter(function (o) { return o.status === tab; }).sort(function (a, b) { return a.createdAt - b.createdAt; });
+    if (!list.length) {
+      $('list').innerHTML = '<div class="empty"><svg aria-hidden="true" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#D6D3D1" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9h12v5a5 5 0 0 1-5 5H9a5 5 0 0 1-5-5V9z"/><path d="M16 10h1.5a2.5 2.5 0 0 1 0 5H16"/></svg><p style="font-size:16px;font-weight:600">No orders here</p><p style="font-size:13px;color:var(--muted)">New orders will show up here with an alert.</p></div>';
+      return;
+    }
+    $('list').innerHTML = list.map(function (o) {
+      var m = minutes(o), cls = m >= 7 ? 'late' : m >= 3 ? 'warn' : '';
+      return '<div class="order' + (freshIds[o.id] ? ' fresh' : '') + '">' +
+        '<div class="top"><div><div class="desk-label">Desk</div><div class="desk">' + esc(o.desk) + '</div></div>' +
+        '<div style="display:flex;flex-direction:column;align-items:flex-end;gap:6px"><span class="chip ' + cls + '">' + (m < 1 ? 'Just now' : m + ' min ago') + '</span><span class="no">Order #' + o.no + '</span></div></div>' +
+        '<div class="items">' + o.items.map(function (it) {
+          var d = [it.sugar, it.note].filter(Boolean).join(' · ') || 'No extras';
+          return '<div class="it"><span class="qty">×' + it.qty + '</span><div><div class="name">' + esc(it.name) + '</div><div class="detail">' + esc(d) + '</div></div></div>';
+        }).join('') + '</div>' +
+        '<button type="button" class="act ' + o.status + '" data-id="' + o.id + '">' + LABEL[o.status] + '</button></div>';
+    }).join('');
+  }
+  document.querySelectorAll('.tab').forEach(function (b) {
+    b.onclick = function () { tab = b.dataset.tab; document.querySelectorAll('.tab').forEach(function (x) { x.setAttribute('aria-selected', String(x === b)); }); render(); };
+  });
+  $('list').addEventListener('click', function (e) {
+    var b = e.target.closest('.act'); if (!b) return;
+    var o = orders.find(function (x) { return x.id === b.dataset.id; }); if (!o) return;
+    b.disabled = true;
+    fetch('/api/orders/' + o.id, { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ status: NEXT[o.status] }) })
+      .then(function (r) { return r.json(); }).then(upsert).catch(function () { b.disabled = false; });
+  });
+  function upsert(o) {
+    if (!o || !o.id) return;
+    var i = orders.findIndex(function (x) { return x.id === o.id; });
+    if (['new', 'prep', 'ready'].indexOf(o.status) < 0) { if (i >= 0) orders.splice(i, 1); }
+    else if (i >= 0) orders[i] = o; else orders.push(o);
+    render();
+  }
+  function loadOrders() { return fetch('/api/orders').then(function (r) { return r.json(); }).then(function (l) { orders = l; render(); }); }
+
+  function connect() {
+    var es = new EventSource('/api/events');
+    es.onopen = function () { $('liveDot').classList.remove('off'); $('liveText').textContent = 'Live · new orders appear instantly'; loadOrders(); };
+    es.onerror = function () { $('liveDot').classList.add('off'); $('liveText').textContent = 'Reconnecting…'; };
+    es.addEventListener('order', function (e) {
+      var o = JSON.parse(e.data), isNew = o.status === 'new' && !orders.some(function (x) { return x.id === o.id; });
+      if (isNew) { freshIds[o.id] = true; setTimeout(function () { delete freshIds[o.id]; }, 4000); beep(); }
+      upsert(o);
+    });
+  }
+  renderSound(); loadOrders(); connect();
+  setInterval(render, 30000);
+  // Keeps free cloud hosting awake while this screen is open.
+  setInterval(function () { fetch('/api/ping').catch(function () {}); }, 10 * 60000);
+})();
+</script>
+</body>
+</html>

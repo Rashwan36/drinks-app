@@ -1,0 +1,298 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#1C1917">
+<title>Pantry — Order a drink</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root { --ink:#1C1917; --muted:#57534E; --bg:#FFF5ED; --line:#FAD9C1; --line2:#F2C4A2; --sep:#FCE6D6; --accent:#F97316; --accent-ink:#C2410C; --danger:#B42318; }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; background: var(--bg); color: var(--ink); font-family: 'IBM Plex Sans', system-ui, -apple-system, sans-serif; -webkit-tap-highlight-color: transparent; }
+  button, input { font-family: inherit; }
+  .app { max-width: 520px; margin: 0 auto; min-height: 100vh; position: relative; padding-bottom: 110px; }
+  header { background: var(--ink); color: #fff; padding: 32px 20px 28px; border-radius: 0 0 28px 28px; margin-bottom: 18px; }
+  header .eyebrow { margin: 0; font-size: 13px; font-weight: 600; color: #FDBA74; letter-spacing: .5px; text-transform: uppercase; }
+  header h1 { margin: 6px 0; font-size: 26px; line-height: 1.25; }
+  header p { margin: 0; font-size: 14px; color: #D6D3D1; }
+  .pills { display: flex; gap: 8px; padding: 0 20px 16px; }
+  .pill { height: 44px; padding: 0 20px; border-radius: 22px; font-size: 15px; font-weight: 600; cursor: pointer; background: #fff; color: var(--ink); border: 1px solid var(--line2); }
+  .pill[aria-pressed="true"] { background: var(--accent); border-color: var(--accent); }
+  .grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; padding: 0 20px; }
+  .card { background: #fff; border: none; border-radius: 18px; padding: 14px; display: flex; flex-direction: column; gap: 10px; text-align: left; cursor: pointer; color: var(--ink); box-shadow: 0 1px 2px rgba(28,25,23,.06), 0 6px 16px rgba(28,25,23,.06); }
+  .tile { width: 48px; height: 48px; border-radius: 12px; display: flex; align-items: center; justify-content: center; }
+  .tile.hot { background: #FFEDD5; } .tile.cold { background: #E1EEFA; }
+  .card .name { font-size: 16px; font-weight: 600; }
+  .card .desc { font-size: 12px; color: var(--muted); }
+  .card .add { font-size: 13px; font-weight: 600; color: var(--accent-ink); display: flex; align-items: center; gap: 4px; }
+  .empty { padding: 32px 20px; text-align: center; color: var(--muted); font-size: 14px; grid-column: 1 / -1; }
+  .bar { position: fixed; left: 0; right: 0; bottom: 0; padding: 16px 20px calc(20px + env(safe-area-inset-bottom)); background: linear-gradient(to top, var(--bg) 70%, rgba(255,245,237,0)); }
+  .bar-inner { max-width: 480px; margin: 0 auto; }
+  .btn { width: 100%; height: 56px; border: none; border-radius: 16px; background: var(--accent); color: var(--ink); font-size: 16px; font-weight: 600; cursor: pointer; }
+  .btn:disabled { opacity: .6; cursor: default; }
+  .btn.dark { background: var(--ink); color: #fff; display: flex; align-items: center; justify-content: space-between; padding: 0 20px; }
+  .btn.outline { background: #fff; color: var(--ink); border: 1.5px solid var(--ink); }
+  .count { min-width: 28px; height: 28px; border-radius: 14px; background: #fff; color: var(--ink); font-size: 14px; font-weight: 700; display: flex; align-items: center; justify-content: center; padding: 0 8px; }
+  .overlay { position: fixed; inset: 0; background: rgba(28,25,23,.5); display: flex; flex-direction: column; justify-content: flex-end; z-index: 10; }
+  .sheet { background: #fff; border-radius: 24px 24px 0 0; padding: 20px 20px calc(28px + env(safe-area-inset-bottom)); display: flex; flex-direction: column; gap: 20px; max-width: 520px; width: 100%; margin: 0 auto; }
+  .row { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+  .sheet h2, .page h2 { margin: 0; font-size: 22px; }
+  .icon-btn { width: 44px; height: 44px; border-radius: 22px; border: none; background: var(--bg); display: flex; align-items: center; justify-content: center; cursor: pointer; flex-shrink: 0; }
+  .label { margin: 0; font-size: 14px; font-weight: 600; }
+  .seg { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; }
+  .seg button { height: 44px; border-radius: 12px; font-size: 14px; font-weight: 600; cursor: pointer; background: #fff; color: var(--ink); border: 1px solid var(--line2); }
+  .seg button[aria-pressed="true"] { background: var(--accent); border-color: var(--accent); }
+  .stepper { display: flex; align-items: center; gap: 10px; }
+  .stepper button { width: 44px; height: 44px; border-radius: 12px; border: 1px solid var(--line2); background: #fff; font-size: 20px; cursor: pointer; color: var(--ink); }
+  .stepper span { min-width: 22px; text-align: center; font-size: 17px; font-weight: 700; }
+  .field { display: flex; flex-direction: column; gap: 8px; }
+  .field input { height: 48px; border-radius: 12px; border: 1px solid var(--line2); padding: 0 14px; font-size: 16px; color: var(--ink); background: #fff; }
+  .field input.big { height: 56px; font-size: 22px; font-weight: 700; letter-spacing: 1px; border-width: 1.5px; }
+  .hint { margin: 0; font-size: 12px; color: var(--muted); }
+  .error { margin: 0; font-size: 13px; font-weight: 600; color: var(--danger); }
+  .page { position: fixed; inset: 0; background: var(--bg); z-index: 5; overflow-y: auto; }
+  .page-inner { max-width: 520px; margin: 0 auto; min-height: 100%; display: flex; flex-direction: column; }
+  .page-head { padding: 24px 20px 12px; display: flex; align-items: center; gap: 12px; }
+  .box { background: #fff; border: 1px solid var(--line); border-radius: 16px; }
+  .line { padding: 14px 16px; display: flex; align-items: center; gap: 12px; border-bottom: 1px solid var(--sep); }
+  .line:last-child { border-bottom: none; }
+  .line .name { font-size: 15px; font-weight: 600; } .line .detail { font-size: 12px; color: var(--muted); }
+  .done { padding: 64px 24px calc(28px + env(safe-area-inset-bottom)); gap: 28px; background: #fff; }
+  .check { width: 80px; height: 80px; border-radius: 40px; background: #FFE4D0; display: flex; align-items: center; justify-content: center; }
+  .steps { background: var(--bg); border-radius: 16px; padding: 18px; display: flex; flex-direction: column; gap: 14px; }
+  .step { display: flex; align-items: center; gap: 12px; font-size: 15px; color: var(--muted); font-weight: 500; }
+  .dot { width: 14px; height: 14px; border-radius: 7px; background: #fff; border: 2px solid #A8A29E; flex-shrink: 0; }
+  .step.past { color: var(--ink); } .step.past .dot { background: var(--accent); border-color: var(--accent); }
+  .step.now { color: var(--ink); font-weight: 700; } .step.now .dot { background: var(--accent); border-color: var(--accent); box-shadow: 0 0 0 4px #FED7B8; }
+  .link-btn { background: none; border: none; color: var(--danger); font-size: 14px; font-weight: 600; cursor: pointer; padding: 12px; }
+  .hidden { display: none !important; }
+  .toast { position: fixed; left: 50%; top: 16px; transform: translateX(-50%); background: var(--ink); color: #fff; padding: 12px 16px; border-radius: 12px; font-size: 14px; z-index: 50; max-width: 90%; }
+</style>
+</head>
+<body>
+<div class="app">
+  <header>
+    <p class="eyebrow">Pantry</p>
+    <h1>What would you like today?</h1>
+    <p>Pick your drink, add your desk number, and we’ll bring it over.</p>
+  </header>
+  <div class="pills" role="group" aria-label="Category">
+    <button class="pill" type="button" data-cat="hot" aria-pressed="true">Hot drinks</button>
+    <button class="pill" type="button" data-cat="cold" aria-pressed="false">Cold drinks</button>
+  </div>
+  <div class="grid" id="grid"></div>
+</div>
+
+<div class="bar hidden" id="bar">
+  <div class="bar-inner">
+    <button class="btn dark" type="button" id="viewOrder"><span>View order</span><span class="count" id="count">0</span></button>
+  </div>
+</div>
+
+<!-- item options -->
+<div class="overlay hidden" id="itemSheet">
+  <div class="sheet" role="dialog" aria-modal="true" aria-labelledby="itemName">
+    <div class="row">
+      <h2 id="itemName"></h2>
+      <button class="icon-btn" type="button" aria-label="Close" data-close>
+        <svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#1C1917" stroke-width="2.2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>
+      </button>
+    </div>
+    <div id="sugarBlock" style="display:flex;flex-direction:column;gap:10px">
+      <p class="label">Sugar</p>
+      <div class="seg" id="sugarSeg"></div>
+    </div>
+    <div class="row">
+      <p class="label">Quantity</p>
+      <div class="stepper">
+        <button type="button" aria-label="Decrease" id="qtyDec">−</button>
+        <span id="qty">1</span>
+        <button type="button" aria-label="Increase" id="qtyInc">+</button>
+      </div>
+    </div>
+    <div class="field">
+      <label class="label" for="note">Notes <span style="font-weight:400;color:var(--muted)">(optional)</span></label>
+      <input id="note" type="text" maxlength="100" placeholder="e.g. extra milk">
+    </div>
+    <button class="btn" type="button" id="addBtn">Add to order</button>
+  </div>
+</div>
+
+<!-- cart -->
+<div class="page hidden" id="cartPage">
+  <div class="page-inner">
+    <div class="page-head">
+      <button class="icon-btn" type="button" aria-label="Back to menu" data-close style="background:#fff;border:1px solid var(--line)">
+        <svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#1C1917" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 6l-6 6 6 6"/></svg>
+      </button>
+      <h2>Your order</h2>
+    </div>
+    <div style="flex:1;padding:8px 20px 20px;display:flex;flex-direction:column;gap:16px">
+      <div class="box" id="cartLines"></div>
+      <div class="box field" style="padding:16px">
+        <label class="label" for="desk" style="font-size:15px">Desk number</label>
+        <input class="big" id="desk" type="text" inputmode="numeric" autocomplete="off" maxlength="6" placeholder="Enter your desk number">
+        <p class="hint">We’ll remember it for next time — you can change it anytime.</p>
+        <p class="error hidden" id="cartError" role="alert"></p>
+      </div>
+    </div>
+    <div style="padding:12px 20px calc(28px + env(safe-area-inset-bottom))">
+      <button class="btn" type="button" id="placeBtn" style="font-size:17px">Place order</button>
+    </div>
+  </div>
+</div>
+
+<!-- tracking -->
+<div class="page hidden" id="trackPage">
+  <div class="page-inner done">
+    <div style="display:flex;flex-direction:column;align-items:center;gap:12px;text-align:center">
+      <span class="check">
+        <svg aria-hidden="true" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#C2410C" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>
+      </span>
+      <h2 id="trackTitle">Your order is in the kitchen</h2>
+      <p style="margin:0;font-size:15px;color:var(--muted)" id="trackSub"></p>
+    </div>
+    <div class="steps" id="steps" aria-live="polite"></div>
+    <div style="flex:1"></div>
+    <button class="link-btn hidden" type="button" id="cancelBtn">Cancel order</button>
+    <button class="btn outline" type="button" id="newBtn">New order</button>
+  </div>
+</div>
+
+<script>
+(function () {
+  var SUGAR = ['None', 'Light', 'Medium', 'Extra'];
+  var menu = [], cat = 'hot', cart = [], current = null, sugar = 2, qty = 1, order = null;
+  var $ = function (id) { return document.getElementById(id); };
+  function esc(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
+  function store(k, v) { try { v == null ? localStorage.removeItem(k) : localStorage.setItem(k, v); } catch (e) {} }
+  function load(k) { try { return localStorage.getItem(k); } catch (e) { return null; } }
+  function toast(msg) { var t = document.createElement('div'); t.className = 'toast'; t.textContent = msg; document.body.appendChild(t); setTimeout(function () { t.remove(); }, 3000); }
+  function api(method, url, body) {
+    return fetch(url, { method: method, headers: { 'Content-Type': 'application/json' }, body: body ? JSON.stringify(body) : undefined })
+      .then(function (r) { return r.json().then(function (j) { if (!r.ok) throw new Error(j.error || 'Something went wrong'); return j; }); });
+  }
+  var ICON = {
+    hot: '<svg aria-hidden="true" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#9A4A0B" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9h12v5a5 5 0 0 1-5 5H9a5 5 0 0 1-5-5V9z"/><path d="M16 10h1.5a2.5 2.5 0 0 1 0 5H16"/><path d="M8 3c-.6.8-.6 1.6 0 2.4M12 3c-.6.8-.6 1.6 0 2.4"/></svg>',
+    cold: '<svg aria-hidden="true" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#1D5A96" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 4h12l-1.6 15.2A2 2 0 0 1 14.4 21H9.6a2 2 0 0 1-2-1.8L6 4z"/><path d="M6.6 9h10.8"/></svg>'
+  };
+
+  // ---- menu ----
+  function loadMenu() {
+    return api('GET', '/api/menu').then(function (m) {
+      menu = m;
+      cart = cart.filter(function (l) { return menu.some(function (x) { return x.id === l.id; }); });
+      renderGrid(); renderBar(); if (!$('cartPage').classList.contains('hidden')) renderCart();
+    }).catch(function () { $('grid').innerHTML = '<p class="empty">Couldn’t load the menu. Check your connection and refresh.</p>'; });
+  }
+  function renderGrid() {
+    var list = menu.filter(function (m) { return m.cat === cat; });
+    $('grid').innerHTML = list.length ? list.map(function (m) {
+      return '<button class="card" type="button" data-id="' + esc(m.id) + '"><span class="tile ' + m.cat + '">' + ICON[m.cat] + '</span>' +
+        '<span style="display:flex;flex-direction:column;gap:2px"><span class="name">' + esc(m.name) + '</span><span class="desc">' + esc(m.desc) + '</span></span>' +
+        '<span class="add"><svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>Add</span></button>';
+    }).join('') : '<p class="empty">Nothing here right now.</p>';
+  }
+  document.querySelectorAll('.pill').forEach(function (b) {
+    b.addEventListener('click', function () {
+      cat = b.dataset.cat;
+      document.querySelectorAll('.pill').forEach(function (x) { x.setAttribute('aria-pressed', String(x === b)); });
+      renderGrid();
+    });
+  });
+  $('grid').addEventListener('click', function (e) {
+    var card = e.target.closest('.card'); if (!card) return;
+    current = menu.find(function (m) { return m.id === card.dataset.id; });
+    sugar = 2; qty = 1; $('note').value = '';
+    $('itemName').textContent = current.name;
+    $('sugarBlock').classList.toggle('hidden', !current.sugar);
+    renderSheet(); $('itemSheet').classList.remove('hidden');
+  });
+
+  // ---- item sheet ----
+  function renderSheet() {
+    $('sugarSeg').innerHTML = SUGAR.map(function (s, i) { return '<button type="button" data-s="' + i + '" aria-pressed="' + (i === sugar) + '">' + s + '</button>'; }).join('');
+    $('qty').textContent = qty;
+  }
+  $('sugarSeg').addEventListener('click', function (e) { var b = e.target.closest('button'); if (b) { sugar = +b.dataset.s; renderSheet(); } });
+  $('qtyInc').onclick = function () { if (qty < 20) qty++; renderSheet(); };
+  $('qtyDec').onclick = function () { if (qty > 1) qty--; renderSheet(); };
+  $('itemSheet').addEventListener('click', function (e) { if (e.target === this || e.target.closest('[data-close]')) this.classList.add('hidden'); });
+  $('addBtn').onclick = function () {
+    var s = current.sugar ? sugar : null, note = $('note').value.trim();
+    var ex = cart.find(function (l) { return l.id === current.id && l.sugar === s && l.note === note; });
+    if (ex) ex.qty = Math.min(20, ex.qty + qty); else cart.push({ id: current.id, name: current.name, sugar: s, note: note, qty: qty });
+    $('itemSheet').classList.add('hidden'); renderBar();
+  };
+
+  // ---- cart ----
+  function renderBar() {
+    var n = cart.reduce(function (a, l) { return a + l.qty; }, 0);
+    $('count').textContent = n; $('bar').classList.toggle('hidden', n === 0);
+  }
+  function renderCart() {
+    $('cartLines').innerHTML = cart.length ? cart.map(function (l, i) {
+      var d = []; if (l.sugar != null) d.push(l.sugar === 0 ? 'No sugar' : SUGAR[l.sugar] + ' sugar'); if (l.note) d.push(l.note);
+      return '<div class="line"><div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:2px"><span class="name">' + esc(l.name) + '</span><span class="detail">' + esc(d.join(' · ') || '—') + '</span></div>' +
+        '<div class="stepper"><button type="button" aria-label="Decrease" data-i="' + i + '" data-d="-1">−</button><span>' + l.qty + '</span><button type="button" aria-label="Increase" data-i="' + i + '" data-d="1">+</button></div></div>';
+    }).join('') : '<p class="empty" style="padding:20px 16px">Your order is empty. Head back to the menu to pick a drink.</p>';
+  }
+  $('cartLines').addEventListener('click', function (e) {
+    var b = e.target.closest('button'); if (!b) return;
+    var l = cart[+b.dataset.i]; l.qty += +b.dataset.d;
+    if (l.qty <= 0) cart.splice(+b.dataset.i, 1); else if (l.qty > 20) l.qty = 20;
+    renderCart(); renderBar();
+  });
+  $('viewOrder').onclick = function () { $('desk').value = load('desk') || ''; $('cartError').classList.add('hidden'); renderCart(); $('cartPage').classList.remove('hidden'); };
+  $('cartPage').addEventListener('click', function (e) { if (e.target.closest('[data-close]')) $('cartPage').classList.add('hidden'); });
+  $('desk').addEventListener('input', function () { this.value = this.value.replace(/[^0-9٠-٩]/g, ''); $('cartError').classList.add('hidden'); });
+  function showError(msg) { $('cartError').textContent = msg; $('cartError').classList.remove('hidden'); }
+  $('placeBtn').onclick = function () {
+    var desk = $('desk').value.trim();
+    if (!cart.length) return showError('Your order is empty — pick a drink first.');
+    if (!desk) return showError('Please enter your desk number so we can find you.');
+    var btn = this; btn.disabled = true; btn.textContent = 'Sending…';
+    api('POST', '/api/orders', { desk: desk, items: cart.map(function (l) { return { id: l.id, qty: l.qty, sugar: l.sugar, note: l.note }; }) })
+      .then(function (o) { store('desk', o.desk); store('orderId', o.id); cart = []; renderBar(); $('cartPage').classList.add('hidden'); showOrder(o); })
+      .catch(function (err) { showError(err.message); loadMenu(); })
+      .then(function () { btn.disabled = false; btn.textContent = 'Place order'; });
+  };
+
+  // ---- tracking ----
+  var STEPS = [['new', 'Sent to kitchen'], ['prep', 'Preparing'], ['ready', 'Ready — on its way'], ['done', 'Delivered']];
+  function showOrder(o) {
+    order = o;
+    var idx = STEPS.findIndex(function (s) { return s[0] === o.status; });
+    var cancelled = o.status === 'cancelled';
+    $('trackTitle').textContent = cancelled ? 'Order cancelled' : o.status === 'done' ? 'Enjoy your drink!' : o.status === 'ready' ? 'Your order is on its way' : 'Your order is in the kitchen';
+    $('trackSub').textContent = 'Order #' + o.no + ' · Desk ' + o.desk;
+    $('steps').classList.toggle('hidden', cancelled);
+    $('steps').innerHTML = STEPS.map(function (s, i) { return '<div class="step ' + (i < idx ? 'past' : i === idx ? 'now' : '') + '"><span class="dot"></span>' + s[1] + '</div>'; }).join('');
+    $('cancelBtn').classList.toggle('hidden', o.status !== 'new');
+    $('trackPage').classList.remove('hidden');
+    if (cancelled || o.status === 'done') store('orderId', null);
+  }
+  $('cancelBtn').onclick = function () {
+    if (!order) return;
+    api('POST', '/api/orders/' + order.id + '/cancel').then(showOrder).catch(function (e) { toast(e.message); });
+  };
+  $('newBtn').onclick = function () { $('trackPage').classList.add('hidden'); order = null; };
+
+  // ---- live updates ----
+  function connect() {
+    var es = new EventSource('/api/events');
+    es.addEventListener('order', function (e) { var o = JSON.parse(e.data); if (order && o.id === order.id) showOrder(o); });
+    es.addEventListener('menu', loadMenu);
+  }
+
+  loadMenu().then(function () {
+    var id = load('orderId');
+    if (id) api('GET', '/api/orders/' + id).then(function (o) { if (['new', 'prep', 'ready'].indexOf(o.status) >= 0) showOrder(o); else store('orderId', null); }).catch(function () { store('orderId', null); });
+  });
+  connect();
+})();
+</script>
+</body>
+</html>

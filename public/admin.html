@@ -1,0 +1,213 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#1C1917">
+<title>إدارة المنيو</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root { --ink:#1C1917; --muted:#57534E; --bg:#FFF5ED; --line:#FAD9C1; --line2:#F2C4A2; --sep:#FCE6D6; --accent:#F97316; --danger:#B42318; }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; background: var(--bg); color: var(--ink); font-family: 'IBM Plex Sans Arabic', 'IBM Plex Sans', system-ui, sans-serif; -webkit-tap-highlight-color: transparent; }
+  button, input { font-family: inherit; }
+  .en { font-family: 'IBM Plex Sans', system-ui, sans-serif; }
+  .app { max-width: 560px; margin: 0 auto; min-height: 100vh; padding-bottom: 110px; }
+  header { background: var(--ink); color: #fff; padding: 32px 20px 28px; border-radius: 0 0 28px 28px; margin-bottom: 18px; }
+  header .eyebrow { margin: 0; font-size: 13px; font-weight: 600; color: #FDBA74; }
+  header h1 { margin: 6px 0; font-size: 26px; }
+  header p { margin: 0; font-size: 14px; color: #D6D3D1; }
+  .tabs { margin: 0 20px 16px; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 4px; padding: 4px; background: #fff; border: 1px solid var(--line); border-radius: 14px; }
+  .tab { height: 44px; border-radius: 10px; border: none; font-size: 15px; font-weight: 600; cursor: pointer; background: transparent; color: var(--muted); }
+  .tab[aria-selected="true"] { background: var(--accent); color: var(--ink); }
+  .box { margin: 0 20px; background: #fff; border: 1px solid var(--line); border-radius: 16px; }
+  .row { padding: 12px 16px; display: flex; align-items: center; gap: 12px; border-bottom: 1px solid var(--sep); }
+  .row:last-child { border-bottom: none; }
+  .row.off { background: #FFF9F4; }
+  .row .name { font-size: 16px; font-weight: 600; }
+  .row .desc { font-size: 13px; color: var(--muted); }
+  .tag { display: inline-block; margin-top: 4px; font-size: 12px; font-weight: 600; color: #8A2C0D; background: #FFE4D6; padding: 2px 8px; border-radius: 6px; }
+  .switch { width: 52px; height: 32px; border-radius: 16px; border: none; padding: 3px; cursor: pointer; flex-shrink: 0; display: flex; align-items: center; background: #D6D3D1; justify-content: flex-end; }
+  .switch[aria-checked="true"] { background: var(--accent); justify-content: flex-start; }
+  .switch span { width: 26px; height: 26px; border-radius: 13px; background: #fff; box-shadow: 0 1px 3px rgba(28,25,23,.25); }
+  .icon-btn { width: 44px; height: 44px; border-radius: 12px; border: 1px solid var(--line2); background: #fff; display: flex; align-items: center; justify-content: center; cursor: pointer; flex-shrink: 0; }
+  .empty { padding: 24px 16px; text-align: center; color: var(--muted); font-size: 14px; margin: 0; }
+  .bar { position: fixed; left: 0; right: 0; bottom: 0; padding: 16px 20px calc(20px + env(safe-area-inset-bottom)); background: linear-gradient(to top, var(--bg) 70%, rgba(255,245,237,0)); }
+  .bar > * { max-width: 520px; margin: 0 auto; }
+  .btn { width: 100%; height: 56px; border: none; border-radius: 16px; background: var(--accent); color: var(--ink); font-size: 16px; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; }
+  .btn:disabled { opacity: .6; }
+  .btn.danger { width: auto; padding: 0 18px; background: #fff; color: var(--danger); border: 1.5px solid #E4B4AE; }
+  .overlay { position: fixed; inset: 0; background: rgba(28,25,23,.5); display: flex; flex-direction: column; justify-content: flex-end; z-index: 10; }
+  .sheet { background: #fff; border-radius: 24px 24px 0 0; padding: 20px 20px calc(28px + env(safe-area-inset-bottom)); display: flex; flex-direction: column; gap: 16px; max-width: 560px; width: 100%; margin: 0 auto; }
+  .sheet h2 { margin: 0; font-size: 22px; }
+  .field { display: flex; flex-direction: column; gap: 6px; }
+  .label { margin: 0; font-size: 14px; font-weight: 600; }
+  .field input { height: 48px; border-radius: 12px; border: 1px solid var(--line2); padding: 0 14px; font-size: 16px; color: var(--ink); background: #fff; }
+  .seg { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+  .seg button { height: 46px; border-radius: 12px; font-size: 14px; font-weight: 600; cursor: pointer; background: #fff; color: var(--ink); border: 1px solid var(--line2); }
+  .seg button[aria-pressed="true"] { background: var(--accent); border-color: var(--accent); }
+  .between { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+  .error { margin: 0; font-size: 13px; font-weight: 600; color: var(--danger); }
+  .login { max-width: 400px; margin: 0 auto; padding: 0 20px; display: flex; flex-direction: column; gap: 16px; }
+  .hidden { display: none !important; }
+</style>
+</head>
+<body>
+<div class="app">
+  <header>
+    <p class="eyebrow">لوحة الإدارة</p>
+    <h1>إدارة المنيو</h1>
+    <p id="summary">سجّل دخول عشان تعدّل المنيو</p>
+  </header>
+
+  <form class="login" id="loginForm">
+    <div class="field">
+      <label class="label" for="pin">الرقم السري</label>
+      <input id="pin" type="password" inputmode="numeric" autocomplete="current-password" required>
+    </div>
+    <p class="error hidden" id="loginError" role="alert"></p>
+    <button class="btn" type="submit">دخول</button>
+  </form>
+
+  <div id="panel" class="hidden">
+    <div class="tabs" role="tablist">
+      <button class="tab" role="tab" data-cat="hot" aria-selected="true">مشروبات ساخنة</button>
+      <button class="tab" role="tab" data-cat="cold" aria-selected="false">مشروبات باردة</button>
+    </div>
+    <div class="box" id="list"></div>
+  </div>
+</div>
+
+<div class="bar hidden" id="bar">
+  <button class="btn" type="button" id="addBtn">
+    <svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
+    إضافة مشروب
+  </button>
+</div>
+
+<div class="overlay hidden" id="sheet">
+  <form class="sheet" id="itemForm" role="dialog" aria-modal="true" aria-labelledby="sheetTitle">
+    <div class="between">
+      <h2 id="sheetTitle">مشروب جديد</h2>
+      <button class="icon-btn" type="button" aria-label="إغلاق" id="closeBtn" style="border:none;background:var(--bg);border-radius:22px">
+        <svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#1C1917" stroke-width="2.2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>
+      </button>
+    </div>
+    <div class="field">
+      <label class="label" for="fName">اسم المشروب بالإنجليزي</label>
+      <input class="en" id="fName" dir="ltr" type="text" maxlength="40" placeholder="e.g. Green tea">
+    </div>
+    <div class="field">
+      <label class="label" for="fDesc">وصف قصير بالإنجليزي <span style="font-weight:400;color:var(--muted)">(اختياري)</span></label>
+      <input class="en" id="fDesc" dir="ltr" type="text" maxlength="60" placeholder="e.g. Light and refreshing">
+    </div>
+    <div class="field">
+      <p class="label">القسم</p>
+      <div class="seg" id="fCat">
+        <button type="button" data-cat="hot" aria-pressed="true">مشروبات ساخنة</button>
+        <button type="button" data-cat="cold" aria-pressed="false">مشروبات باردة</button>
+      </div>
+    </div>
+    <div class="between">
+      <div style="display:flex;flex-direction:column;gap:2px">
+        <span class="label">اختيار السكر</span>
+        <span style="font-size:12px;color:var(--muted)">الموظف يختار درجة السكر</span>
+      </div>
+      <button type="button" class="switch" role="switch" id="fSugar" aria-checked="true" aria-label="اختيار السكر"><span></span></button>
+    </div>
+    <p class="error hidden" id="formError" role="alert"></p>
+    <div style="display:flex;gap:10px;padding-top:4px">
+      <button class="btn" type="submit" style="flex:1" id="saveBtn">حفظ</button>
+      <button class="btn danger hidden" type="button" id="delBtn">حذف</button>
+    </div>
+  </form>
+</div>
+
+<script>
+(function () {
+  var token = null, items = [], cat = 'hot', editing = null, fCat = 'hot', confirmDel = false;
+  var $ = function (id) { return document.getElementById(id); };
+  function esc(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
+  try { token = sessionStorage.getItem('adminToken'); } catch (e) {}
+  function api(method, url, body) {
+    return fetch(url, { method: method, headers: { 'Content-Type': 'application/json', 'X-Admin-Token': token || '' }, body: body ? JSON.stringify(body) : undefined })
+      .then(function (r) { return r.json().then(function (j) { if (r.status === 401 && url !== '/api/admin/login') logout(); if (!r.ok) throw new Error(j.error || 'حصلت مشكلة'); return j; }); });
+  }
+  function logout() { token = null; try { sessionStorage.removeItem('adminToken'); } catch (e) {} $('panel').classList.add('hidden'); $('bar').classList.add('hidden'); $('loginForm').classList.remove('hidden'); $('summary').textContent = 'سجّل دخول عشان تعدّل المنيو'; }
+
+  $('loginForm').onsubmit = function (e) {
+    e.preventDefault();
+    api('POST', '/api/admin/login', { pin: $('pin').value }).then(function (r) {
+      token = r.token; try { sessionStorage.setItem('adminToken', token); } catch (e2) {}
+      $('pin').value = ''; $('loginError').classList.add('hidden'); start();
+    }).catch(function (err) { $('loginError').textContent = err.message; $('loginError').classList.remove('hidden'); });
+  };
+
+  function start() {
+    $('loginForm').classList.add('hidden'); $('panel').classList.remove('hidden'); $('bar').classList.remove('hidden');
+    return load();
+  }
+  function load() { return api('GET', '/api/admin/menu').then(function (l) { items = l; render(); }); }
+  function render() {
+    var out = items.filter(function (x) { return !x.available; }).length;
+    $('summary').textContent = items.length + ' مشروب في المنيو' + (out ? ' · ' + out + ' مش متاح دلوقتي' : '');
+    var list = items.filter(function (x) { return x.cat === cat; });
+    $('list').innerHTML = list.length ? list.map(function (x) {
+      return '<div class="row' + (x.available ? '' : ' off') + '"><div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:2px">' +
+        '<span class="name en" dir="ltr" style="text-align:right">' + esc(x.name) + '</span><span class="desc en" dir="ltr" style="text-align:right">' + esc(x.desc || '—') + '</span>' +
+        (x.available ? '' : '<span><span class="tag">خلص — مش ظاهر في المنيو</span></span>') + '</div>' +
+        '<button type="button" class="switch" role="switch" aria-checked="' + x.available + '" aria-label="متاح: ' + esc(x.name) + '" data-toggle="' + esc(x.id) + '"><span></span></button>' +
+        '<button type="button" class="icon-btn" aria-label="تعديل ' + esc(x.name) + '" data-edit="' + esc(x.id) + '"><svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#1C1917" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20h4L18.5 9.5a2.1 2.1 0 0 0-4-4L4 16v4z"/><path d="M13.5 6.5l4 4"/></svg></button></div>';
+    }).join('') : '<p class="empty">مفيش مشروبات في القسم ده. ضيف أول مشروب.</p>';
+  }
+  document.querySelectorAll('.tab').forEach(function (b) {
+    b.onclick = function () { cat = b.dataset.cat; document.querySelectorAll('.tab').forEach(function (x) { x.setAttribute('aria-selected', String(x === b)); }); render(); };
+  });
+  $('list').addEventListener('click', function (e) {
+    var t = e.target.closest('[data-toggle]'), ed = e.target.closest('[data-edit]');
+    if (t) {
+      var x = items.find(function (i) { return i.id === t.dataset.toggle; });
+      x.available = !x.available; render();
+      api('PUT', '/api/admin/items/' + encodeURIComponent(x.id), { available: x.available }).catch(function () { x.available = !x.available; render(); });
+    }
+    if (ed) openSheet(items.find(function (i) { return i.id === ed.dataset.edit; }));
+  });
+
+  function setCat(c) { fCat = c; document.querySelectorAll('#fCat button').forEach(function (b) { b.setAttribute('aria-pressed', String(b.dataset.cat === c)); }); }
+  function openSheet(x) {
+    editing = x || null; confirmDel = false;
+    $('sheetTitle').textContent = x ? 'تعديل مشروب' : 'مشروب جديد';
+    $('fName').value = x ? x.name : ''; $('fDesc').value = x ? x.desc : '';
+    setCat(x ? x.cat : cat);
+    $('fSugar').setAttribute('aria-checked', String(x ? x.sugar : true));
+    $('delBtn').classList.toggle('hidden', !x); $('delBtn').textContent = 'حذف';
+    $('formError').classList.add('hidden');
+    $('sheet').classList.remove('hidden'); $('fName').focus();
+  }
+  $('addBtn').onclick = function () { openSheet(null); };
+  $('closeBtn').onclick = function () { $('sheet').classList.add('hidden'); };
+  $('sheet').addEventListener('click', function (e) { if (e.target === this) this.classList.add('hidden'); });
+  $('fCat').addEventListener('click', function (e) { var b = e.target.closest('button'); if (b) setCat(b.dataset.cat); });
+  $('fSugar').onclick = function () { this.setAttribute('aria-checked', String(this.getAttribute('aria-checked') !== 'true')); };
+  $('itemForm').onsubmit = function (e) {
+    e.preventDefault();
+    var body = { name: $('fName').value.trim(), desc: $('fDesc').value.trim(), cat: fCat, sugar: $('fSugar').getAttribute('aria-checked') === 'true' };
+    if (!body.name) { $('formError').textContent = 'اكتب اسم المشروب.'; $('formError').classList.remove('hidden'); return; }
+    var p = editing ? api('PUT', '/api/admin/items/' + encodeURIComponent(editing.id), body) : api('POST', '/api/admin/items', Object.assign(body, { available: true }));
+    $('saveBtn').disabled = true;
+    p.then(function () { $('sheet').classList.add('hidden'); cat = fCat; document.querySelectorAll('.tab').forEach(function (x) { x.setAttribute('aria-selected', String(x.dataset.cat === cat)); }); return load(); })
+      .catch(function (err) { $('formError').textContent = err.message; $('formError').classList.remove('hidden'); })
+      .then(function () { $('saveBtn').disabled = false; });
+  };
+  $('delBtn').onclick = function () {
+    if (!confirmDel) { confirmDel = true; this.textContent = 'متأكد؟ اضغط تاني'; return; }
+    api('DELETE', '/api/admin/items/' + encodeURIComponent(editing.id)).then(function () { $('sheet').classList.add('hidden'); return load(); })
+      .catch(function (err) { $('formError').textContent = err.message; $('formError').classList.remove('hidden'); });
+  };
+
+  if (token) start().catch(function () {});
+})();
+</script>
+</body>
+</html>
