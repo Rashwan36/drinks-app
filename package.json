@@ -1,0 +1,14 @@
+{
+  "name": "office-drinks-app",
+  "version": "1.0.0",
+  "description": "Office drinks ordering: employee menu, live kitchen screen, menu admin",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "license": "UNLICENSED",
+  "private": true
+}
