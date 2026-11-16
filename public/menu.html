@@ -135,7 +135,7 @@
       <div class="box" id="cartLines"></div>
       <div class="box field" style="padding:16px">
         <label class="label" for="desk" style="font-size:15px">Desk number</label>
-        <input class="big" id="desk" type="text" inputmode="numeric" autocomplete="off" maxlength="6" placeholder="Enter your desk number">
+        <input class="big" id="desk" type="text" autocomplete="off" autocapitalize="characters" maxlength="10" placeholder="e.g. 12 or B-12">
         <p class="hint">We’ll remember it for next time — you can change it anytime.</p>
         <p class="error hidden" id="cartError" role="alert"></p>
       </div>
@@ -249,7 +249,7 @@
   });
   $('viewOrder').onclick = function () { $('desk').value = load('desk') || ''; $('cartError').classList.add('hidden'); renderCart(); $('cartPage').classList.remove('hidden'); };
   $('cartPage').addEventListener('click', function (e) { if (e.target.closest('[data-close]')) $('cartPage').classList.add('hidden'); });
-  $('desk').addEventListener('input', function () { this.value = this.value.replace(/[^0-9٠-٩]/g, ''); $('cartError').classList.add('hidden'); });
+  $('desk').addEventListener('input', function () { this.value = this.value.replace(/[^A-Za-z0-9٠-٩\u0621-\u064A \-]/g, ''); $('cartError').classList.add('hidden'); });
   function showError(msg) { $('cartError').textContent = msg; $('cartError').classList.remove('hidden'); }
   $('placeBtn').onclick = function () {
     var desk = $('desk').value.trim();
