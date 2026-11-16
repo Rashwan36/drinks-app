@@ -47,6 +47,7 @@
   .empty p { margin: 0; }
   .start { position: fixed; inset: 0; background: rgba(12,10,9,.92); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 16px; z-index: 20; padding: 24px; text-align: center; }
   .start button { height: 56px; padding: 0 32px; border-radius: 16px; border: none; background: var(--accent); color: var(--bg); font-size: 17px; font-weight: 700; cursor: pointer; }
+  .credit { margin: 28px 0 0; text-align: center; font-size: 12px; letter-spacing: .3px; color: var(--muted); }
   .hidden { display: none !important; }
 </style>
 </head>
@@ -68,6 +69,7 @@
     <button class="tab" role="tab" data-tab="ready" aria-selected="false">Ready <span class="badge" id="c-ready">0</span></button>
   </div>
   <div class="list" id="list" aria-live="polite"></div>
+  <p class="credit">Prepared by Mohamed Rashwan</p>
 </div>
 
 <div class="start" id="start">
