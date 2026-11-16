@@ -51,14 +51,60 @@
   .error { margin: 0; font-size: 13px; font-weight: 600; color: var(--danger); }
   .login { max-width: 400px; margin: 0 auto; padding: 0 20px; display: flex; flex-direction: column; gap: 16px; }
   .credit { margin: 28px 0 0; text-align: center; font-size: 12px; letter-spacing: .3px; color: var(--muted); font-family: 'IBM Plex Sans', system-ui, sans-serif; }
+  .views { margin: -36px 20px 16px; position: relative; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 4px; padding: 4px; background: #fff; border: 1px solid var(--line); border-radius: 14px; box-shadow: 0 4px 14px rgba(28,25,23,.08); }
+  header.has-views { padding-bottom: 52px; }
+  .dash { padding: 0 20px; display: flex; flex-direction: column; gap: 14px; }
+  .card { background: #fff; border: 1px solid var(--line); border-radius: 16px; padding: 16px; }
+  .card h3 { margin: 0 0 12px; font-size: 15px; font-weight: 700; display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+  .card h3 small { font-size: 12px; font-weight: 500; color: var(--muted); }
+  .live { background: var(--ink); color: #fff; border: none; }
+  .live h3 small { color: #A8A29E; }
+  .live-grid { display: grid; grid-template-columns: 1.1fr 1fr; gap: 14px; align-items: center; }
+  .hero { font-size: 44px; font-weight: 700; line-height: 1; font-family: 'IBM Plex Sans', system-ui, sans-serif; }
+  .hero-label { font-size: 13px; color: #D6D3D1; margin-top: 6px; display: flex; align-items: center; gap: 6px; }
+  .dot { width: 9px; height: 9px; border-radius: 5px; background: #22C55E; display: inline-block; box-shadow: 0 0 0 3px rgba(34,197,94,.25); }
+  .dot.off { background: #78716C; box-shadow: none; }
+  .pipe { display: flex; flex-direction: column; gap: 6px; font-size: 13px; color: #D6D3D1; }
+  .pipe b { color: #fff; font-family: 'IBM Plex Sans', system-ui, sans-serif; font-size: 16px; margin-inline-start: 6px; }
+  .wait { margin-top: 12px; padding-top: 12px; border-top: 1px solid #44403C; font-size: 13px; color: #D6D3D1; }
+  .wait b { color: #fff; } .wait b.warn { color: #FCD34D; } .wait b.late { color: #FCA5A5; }
+  .kpis { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+  .kpi { background: #fff; border: 1px solid var(--line); border-radius: 14px; padding: 12px 14px; }
+  .kpi .v { font-size: 26px; font-weight: 700; font-family: 'IBM Plex Sans', system-ui, sans-serif; line-height: 1.1; }
+  .kpi .v small { font-size: 13px; font-weight: 600; color: var(--muted); margin-inline-start: 2px; }
+  .kpi .l { font-size: 13px; color: var(--muted); margin-top: 4px; }
+  .kpi .d { font-size: 12px; font-weight: 600; margin-top: 4px; color: var(--muted); }
+  .hbars { display: flex; flex-direction: column; gap: 10px; }
+  .hb { display: grid; grid-template-columns: minmax(0, 7.5em) 1fr auto; gap: 10px; align-items: center; font-size: 14px; }
+  .hb .n { font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .hb .track { height: 12px; background: var(--sep); border-radius: 4px; overflow: hidden; }
+  .hb .fill { height: 100%; background: var(--accent); border-radius: 4px; min-width: 4px; }
+  .hb .c { font-family: 'IBM Plex Sans', system-ui, sans-serif; font-weight: 700; min-width: 2ch; text-align: left; }
+  .vbars { display: flex; align-items: flex-end; gap: 3px; height: 120px; direction: ltr; }
+  .vb { flex: 1; display: flex; flex-direction: column; justify-content: flex-end; height: 100%; position: relative; cursor: default; }
+  .vb .col { background: var(--accent); border-radius: 4px 4px 0 0; min-height: 0; }
+  .vb.zero .col { background: var(--sep); height: 3px !important; border-radius: 2px; }
+  .vb.peak .col { background: #C2410C; }
+  .vb:hover .col { opacity: .8; }
+  .vb .tip { position: absolute; bottom: calc(100% + 4px); left: 50%; transform: translateX(-50%); background: var(--ink); color: #fff; font-size: 12px; padding: 4px 8px; border-radius: 6px; white-space: nowrap; pointer-events: none; opacity: 0; transition: opacity .1s; z-index: 2; }
+  .vb:hover .tip { opacity: 1; }
+  .axis { display: flex; gap: 3px; direction: ltr; margin-top: 6px; font-size: 11px; color: var(--muted); font-family: 'IBM Plex Sans', system-ui, sans-serif; }
+  .axis span { flex: 1; text-align: center; overflow: visible; white-space: nowrap; }
+  .chips { display: flex; flex-wrap: wrap; gap: 8px; }
+  .chip { background: var(--bg); border: 1px solid var(--line); border-radius: 10px; padding: 6px 10px; font-size: 13px; }
+  .chip b { font-family: 'IBM Plex Sans', system-ui, sans-serif; margin-inline-start: 4px; }
+  .mini-seg { display: inline-flex; background: var(--bg); border-radius: 9px; padding: 2px; gap: 2px; }
+  .mini-seg button { border: none; background: transparent; font-size: 12px; font-weight: 600; padding: 4px 10px; border-radius: 7px; cursor: pointer; color: var(--muted); }
+  .mini-seg button[aria-pressed="true"] { background: #fff; color: var(--ink); box-shadow: 0 1px 2px rgba(28,25,23,.12); }
+  .note { font-size: 12px; color: var(--muted); text-align: center; margin: 2px 0 0; }
   .hidden { display: none !important; }
 </style>
 </head>
 <body>
 <div class="app">
-  <header>
+  <header id="hdr">
     <p class="eyebrow">لوحة الإدارة</p>
-    <h1>إدارة المنيو</h1>
+    <h1 id="title">إدارة المنيو</h1>
     <p id="summary">سجّل دخول عشان تعدّل المنيو</p>
   </header>
 
@@ -70,6 +116,60 @@
     <p class="error hidden" id="loginError" role="alert"></p>
     <button class="btn" type="submit">دخول</button>
   </form>
+
+  <div class="views hidden" id="views" role="tablist">
+    <button class="tab" role="tab" data-view="dash" aria-selected="true">لوحة المتابعة</button>
+    <button class="tab" role="tab" data-view="menu" aria-selected="false">المنيو</button>
+  </div>
+
+  <div id="dash" class="dash hidden">
+    <section class="card live">
+      <h3>دلوقتي <small id="updated"></small></h3>
+      <div class="live-grid">
+        <div>
+          <div class="hero" id="kOpen">–</div>
+          <div class="hero-label"><span class="dot off" id="kDot"></span><span id="kLabel">شاشة مطبخ مفتوحة</span></div>
+        </div>
+        <div class="pipe">
+          <div>جديد<b id="aNew">0</b></div>
+          <div>بيتجهز<b id="aPrep">0</b></div>
+          <div>جاهز للتوصيل<b id="aReady">0</b></div>
+        </div>
+      </div>
+      <div class="wait" id="waitLine"></div>
+    </section>
+
+    <div class="kpis" id="kpis"></div>
+
+    <section class="card">
+      <h3>أكتر المشاريب طلبًا
+        <span class="mini-seg" id="drinkRange"><button type="button" data-r="1" aria-pressed="true">النهارده</button><button type="button" data-r="7" aria-pressed="false">7 أيام</button></span>
+      </h3>
+      <div class="hbars" id="drinks"></div>
+    </section>
+
+    <section class="card">
+      <h3>الطلبات حسب الساعة <small id="peak"></small></h3>
+      <div id="hours"></div>
+    </section>
+
+    <section class="card">
+      <h3>آخر 7 أيام <small id="weekTotal"></small></h3>
+      <div id="week"></div>
+    </section>
+
+    <section class="card">
+      <h3>أكتر المكاتب طلبًا <small>النهارده</small></h3>
+      <div class="hbars" id="desks"></div>
+    </section>
+
+    <section class="card">
+      <h3>درجة السكر <small>النهارده</small></h3>
+      <div class="chips" id="sugar"></div>
+    </section>
+
+    <p class="note">الأرقام بتتحدّث لوحدها كل 30 ثانية. الإحصائيات بدأت تتسجّل من يوم تشغيل اللوحة.</p>
+  </div>
 
   <div id="panel" class="hidden">
     <div class="tabs" role="tablist">
@@ -136,7 +236,7 @@
     return fetch(url, { method: method, headers: { 'Content-Type': 'application/json', 'X-Admin-Token': token || '' }, body: body ? JSON.stringify(body) : undefined })
       .then(function (r) { return r.json().then(function (j) { if (r.status === 401 && url !== '/api/admin/login') logout(); if (!r.ok) throw new Error(j.error || 'حصلت مشكلة'); return j; }); });
   }
-  function logout() { token = null; try { sessionStorage.removeItem('adminToken'); } catch (e) {} $('panel').classList.add('hidden'); $('bar').classList.add('hidden'); $('loginForm').classList.remove('hidden'); $('summary').textContent = 'سجّل دخول عشان تعدّل المنيو'; }
+  function logout() { token = null; try { sessionStorage.removeItem('adminToken'); } catch (e) {} $('panel').classList.add('hidden'); $('bar').classList.add('hidden'); $('dash').classList.add('hidden'); $('views').classList.add('hidden'); $('hdr').classList.remove('has-views'); $('title').textContent = 'إدارة المنيو'; clearTimeout(dashTimer); $('loginForm').classList.remove('hidden'); $('summary').textContent = 'سجّل دخول عشان تعدّل المنيو'; }
 
   $('loginForm').onsubmit = function (e) {
     e.preventDefault();
@@ -147,13 +247,15 @@
   };
 
   function start() {
-    $('loginForm').classList.add('hidden'); $('panel').classList.remove('hidden'); $('bar').classList.remove('hidden');
+    $('loginForm').classList.add('hidden'); $('views').classList.remove('hidden'); $('hdr').classList.add('has-views');
+    setView(view);
     return load();
   }
   function load() { return api('GET', '/api/admin/menu').then(function (l) { items = l; render(); }); }
   function render() {
     var out = items.filter(function (x) { return !x.available; }).length;
     $('summary').textContent = items.length + ' مشروب في المنيو' + (out ? ' · ' + out + ' مش متاح دلوقتي' : '');
+    if (view !== 'menu') return;
     var list = items.filter(function (x) { return x.cat === cat; });
     $('list').innerHTML = list.length ? list.map(function (x) {
       return '<div class="row' + (x.available ? '' : ' off') + '"><div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:2px">' +
@@ -163,8 +265,8 @@
         '<button type="button" class="icon-btn" aria-label="تعديل ' + esc(x.name) + '" data-edit="' + esc(x.id) + '"><svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#1C1917" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20h4L18.5 9.5a2.1 2.1 0 0 0-4-4L4 16v4z"/><path d="M13.5 6.5l4 4"/></svg></button></div>';
     }).join('') : '<p class="empty">مفيش مشروبات في القسم ده. ضيف أول مشروب.</p>';
   }
-  document.querySelectorAll('.tab').forEach(function (b) {
-    b.onclick = function () { cat = b.dataset.cat; document.querySelectorAll('.tab').forEach(function (x) { x.setAttribute('aria-selected', String(x === b)); }); render(); };
+  document.querySelectorAll('#panel .tab').forEach(function (b) {
+    b.onclick = function () { cat = b.dataset.cat; document.querySelectorAll('#panel .tab').forEach(function (x) { x.setAttribute('aria-selected', String(x === b)); }); render(); };
   });
   $('list').addEventListener('click', function (e) {
     var t = e.target.closest('[data-toggle]'), ed = e.target.closest('[data-edit]');
@@ -198,7 +300,7 @@
     if (!body.name) { $('formError').textContent = 'اكتب اسم المشروب.'; $('formError').classList.remove('hidden'); return; }
     var p = editing ? api('PUT', '/api/admin/items/' + encodeURIComponent(editing.id), body) : api('POST', '/api/admin/items', Object.assign(body, { available: true }));
     $('saveBtn').disabled = true;
-    p.then(function () { $('sheet').classList.add('hidden'); cat = fCat; document.querySelectorAll('.tab').forEach(function (x) { x.setAttribute('aria-selected', String(x.dataset.cat === cat)); }); return load(); })
+    p.then(function () { $('sheet').classList.add('hidden'); cat = fCat; document.querySelectorAll('#panel .tab').forEach(function (x) { x.setAttribute('aria-selected', String(x.dataset.cat === cat)); }); return load(); })
       .catch(function (err) { $('formError').textContent = err.message; $('formError').classList.remove('hidden'); })
       .then(function () { $('saveBtn').disabled = false; });
   };
@@ -207,6 +309,106 @@
     api('DELETE', '/api/admin/items/' + encodeURIComponent(editing.id)).then(function () { $('sheet').classList.add('hidden'); return load(); })
       .catch(function (err) { $('formError').textContent = err.message; $('formError').classList.remove('hidden'); });
   };
+
+
+  // ---------- dashboard ----------
+  var view = 'dash', stats = null, drinkDays = 1, dashTimer = null;
+  try { view = sessionStorage.getItem('adminView') || 'dash'; } catch (e) {}
+  var SUGAR_AR = { 'No sugar': 'من غير سكر', 'Light sugar': 'سكر خفيف', 'Medium sugar': 'سكر مظبوط', 'Extra sugar': 'سكر زيادة' };
+  var DAY_AR = ['أحد', 'اتنين', 'تلات', 'أربع', 'خميس', 'جمعة', 'سبت'];
+  function fmtMin(ms) { if (!ms) return '–'; var m = ms / 60000; return m < 1 ? '<1' : m < 10 ? m.toFixed(1).replace('.0', '') : String(Math.round(m)); }
+  function dur(ms, l) { if (!ms) return { v: '–', l: l }; if (ms < 60000) return { v: Math.max(1, Math.round(ms / 1000)), u: 'ث', l: l }; return { v: fmtMin(ms), u: 'د', l: l }; }
+  function hourLabel(h) { var p = h < 12 ? 'ص' : 'م'; var x = h % 12 || 12; return x + p; }
+  function sumObj(list, key) { var o = {}; list.forEach(function (d) { Object.keys(d[key]).forEach(function (k) { o[k] = (o[k] || 0) + d[key][k]; }); }); return o; }
+  function top(o, n) { return Object.keys(o).map(function (k) { return [k, o[k]]; }).filter(function (x) { return x[1] > 0; }).sort(function (a, b) { return b[1] - a[1]; }).slice(0, n); }
+  function hbars(el, rows, emptyMsg, ltr) {
+    if (!rows.length) { el.innerHTML = '<p class="empty" style="padding:8px 0">' + emptyMsg + '</p>'; return; }
+    var max = rows[0][1];
+    el.innerHTML = rows.map(function (r) {
+      return '<div class="hb" title="' + esc(r[0]) + ': ' + r[1] + '"><span class="n' + (ltr ? ' en' : '') + '"' + (ltr ? ' dir="ltr" style="text-align:right"' : '') + '>' + esc(r[0]) + '</span>' +
+        '<span class="track"><span class="fill" style="display:block;width:' + Math.max(3, r[1] / max * 100) + '%"></span></span><span class="c">' + r[1] + '</span></div>';
+    }).join('');
+  }
+  function vbars(el, cols, unit) {
+    var max = Math.max.apply(null, cols.map(function (c) { return c.v; }).concat([1]));
+    var peak = cols.reduce(function (a, c) { return c.v > a ? c.v : a; }, 0);
+    el.innerHTML = '<div class="vbars">' + cols.map(function (c) {
+      return '<div class="vb' + (c.v ? '' : ' zero') + (c.v && c.v === peak && cols.length > 8 ? ' peak' : '') + '"><span class="tip">' + esc(c.tip) + ': ' + c.v + ' ' + unit + '</span><div class="col" style="height:' + (c.v / max * 100) + '%"></div></div>';
+    }).join('') + '</div><div class="axis">' + cols.map(function (c) { return '<span>' + esc(c.label) + '</span>'; }).join('') + '</div>';
+  }
+  function renderDash() {
+    if (!stats) return;
+    var t = stats.days[0], y = stats.days[1] || null, a = stats.active, k = stats.kitchens;
+    $('updated').textContent = 'آخر تحديث ' + new Date(stats.now).toLocaleTimeString('ar-EG', { hour: 'numeric', minute: '2-digit' });
+    $('kOpen').textContent = k.open;
+    $('kDot').classList.toggle('off', !k.open);
+    $('kLabel').textContent = k.open === 1 ? 'شاشة مطبخ مفتوحة' : k.open === 2 ? 'شاشتين مطبخ مفتوحين' : 'شاشات مطبخ مفتوحة';
+    $('aNew').textContent = a.new; $('aPrep').textContent = a.prep; $('aReady').textContent = a.ready;
+    var w = a.oldestWaitMs, wm = w / 60000;
+    $('waitLine').innerHTML = (a.new + a.prep) ? 'أقدم طلب مستني من <b class="' + (wm >= 7 ? 'late' : wm >= 3 ? 'warn' : '') + '">' + (wm < 1 ? 'أقل من دقيقة' : fmtMin(w) + ' دقيقة') + '</b>'
+      : (k.open ? 'مفيش طلبات مستنية دلوقتي.' : (k.lastSeenMs != null ? 'شاشة المطبخ مقفولة. آخر مرة كانت مفتوحة من ' + fmtMin(k.lastSeenMs) + ' دقيقة.' : 'مفيش شاشة مطبخ مفتوحة.'));
+
+    var diff = y ? t.orders - y.orders : 0;
+    var kp = [
+      { v: t.orders, l: 'طلب النهارده', d: y ? (diff > 0 ? '▲ ' + diff + ' عن امبارح' : diff < 0 ? '▼ ' + (-diff) + ' عن امبارح' : 'زي امبارح') : '' },
+      { v: t.cups, l: 'مشروب اتطلب' },
+      { v: t.delivered, l: 'اتسلّم' },
+      { v: t.cancelled, l: 'اتلغى', d: t.orders ? Math.round(t.cancelled / t.orders * 100) + '% من الطلبات' : '' },
+      dur(t.ready_n ? t.ready_ms / t.ready_n : 0, 'متوسط وقت التجهيز'),
+      dur(t.done_n ? t.done_ms / t.done_n : 0, 'متوسط لحد ما يوصل')
+    ];
+    $('kpis').innerHTML = kp.map(function (x) { return '<div class="kpi"><div class="v"><bdi dir="ltr">' + x.v + '</bdi>' + (x.u && x.v !== '–' ? '<small>' + x.u + '</small>' : '') + '</div><div class="l">' + x.l + '</div>' + (x.d ? '<div class="d">' + x.d + '</div>' : '') + '</div>'; }).join('');
+
+    var dd = stats.days.slice(0, drinkDays);
+    hbars($('drinks'), top(sumObj(dd, 'drinks'), 6), drinkDays === 1 ? 'لسه مفيش طلبات النهارده.' : 'مفيش طلبات في آخر 7 أيام.', true);
+
+    var hrs = t.hours, keys = Object.keys(hrs).map(Number);
+    var lo = Math.min.apply(null, keys.concat([8])), hi = Math.max.apply(null, keys.concat([17]));
+    var cols = [];
+    for (var h = lo; h <= hi; h++) cols.push({ v: hrs[h] || 0, label: (h - lo) % 2 === 0 ? hourLabel(h) : '', tip: hourLabel(h) });
+    vbars($('hours'), cols, 'طلب');
+    var pk = top(hrs, 1)[0];
+    $('peak').textContent = pk ? 'الذروة الساعة ' + hourLabel(Number(pk[0])) : '';
+
+    var wk = stats.days.slice(0, 7).reverse();
+    vbars($('week'), wk.map(function (d, i) {
+      var dt = new Date(d.date + 'T12:00:00Z'); var name = i === wk.length - 1 ? 'النهارده' : DAY_AR[dt.getUTCDay()];
+      return { v: d.orders, label: name, tip: name + ' ' + d.date.slice(8) + '/' + d.date.slice(5, 7) };
+    }), 'طلب');
+    var tot = wk.reduce(function (s2, d) { return s2 + d.orders; }, 0);
+    $('weekTotal').textContent = tot + ' طلب · ' + wk.reduce(function (s2, d) { return s2 + d.cups; }, 0) + ' مشروب';
+
+    hbars($('desks'), top(t.desks, 5).map(function (r) { return ['مكتب ' + r[0], r[1]]; }), 'لسه مفيش طلبات النهارده.');
+
+    var sg = t.sugar, sTot = Object.keys(sg).reduce(function (s2, kk) { return s2 + sg[kk]; }, 0);
+    $('sugar').innerHTML = sTot ? ['No sugar', 'Light sugar', 'Medium sugar', 'Extra sugar'].filter(function (kk) { return sg[kk]; }).map(function (kk) {
+      return '<span class="chip">' + SUGAR_AR[kk] + '<b>' + Math.round(sg[kk] / sTot * 100) + '%</b></span>';
+    }).join('') : '<p class="empty" style="padding:8px 0">لسه مفيش طلبات النهارده.</p>';
+  }
+  function loadStats() {
+    return api('GET', '/api/admin/stats?days=7').then(function (r) { stats = r; renderDash(); }).catch(function () {});
+  }
+  function scheduleDash() {
+    clearTimeout(dashTimer);
+    dashTimer = setTimeout(function () { if (view === 'dash' && token && !document.hidden) loadStats().then(scheduleDash); else scheduleDash(); }, 30000);
+  }
+  document.addEventListener('visibilitychange', function () { if (!document.hidden && view === 'dash' && token) loadStats(); });
+  $('drinkRange').addEventListener('click', function (e) {
+    var b = e.target.closest('button'); if (!b) return;
+    drinkDays = Number(b.dataset.r);
+    this.querySelectorAll('button').forEach(function (x) { x.setAttribute('aria-pressed', String(x === b)); });
+    renderDash();
+  });
+  function setView(v) {
+    view = v; try { sessionStorage.setItem('adminView', v); } catch (e) {}
+    document.querySelectorAll('[data-view]').forEach(function (x) { x.setAttribute('aria-selected', String(x.dataset.view === v)); });
+    $('dash').classList.toggle('hidden', v !== 'dash');
+    $('panel').classList.toggle('hidden', v !== 'menu');
+    $('bar').classList.toggle('hidden', v !== 'menu');
+    $('title').textContent = v === 'dash' ? 'لوحة المتابعة' : 'إدارة المنيو';
+    if (v === 'dash') { loadStats(); scheduleDash(); } else render();
+  }
+  document.querySelectorAll('[data-view]').forEach(function (b) { b.onclick = function () { setView(b.dataset.view); }; });
 
   if (token) start().catch(function () {});
 })();
