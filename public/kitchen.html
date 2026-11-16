@@ -150,11 +150,15 @@
   }
   // Poll for orders: every 5s while busy, every 15s after 10 quiet minutes (keeps the free database quota low).
   var lastChange = Date.now(), first = true;
+  // A random id per screen so the admin dashboard can count open kitchen screens.
+  var screenId = '';
+  try { screenId = localStorage.getItem('kitchenId') || ''; } catch (e) {}
+  if (!screenId) { screenId = Math.random().toString(36).slice(2, 12) + Date.now().toString(36); try { localStorage.setItem('kitchenId', screenId); } catch (e) {} }
   function setLive(ok) { $('liveDot').classList.toggle('off', !ok); $('liveText').textContent = ok ? 'Live · checking for new orders' : 'Reconnecting…'; }
   function schedule() { setTimeout(poll, Date.now() - lastChange < 600000 ? 5000 : 15000); }
   function poll() {
     if (document.hidden) return schedule();
-    fetch('/api/orders', { cache: 'no-store' }).then(function (r) { if (!r.ok) throw new Error(); return r.json(); }).then(function (l) {
+    fetch('/api/orders', { cache: 'no-store', headers: { 'X-Kitchen-Id': screenId } }).then(function (r) { if (!r.ok) throw new Error(); return r.json(); }).then(function (l) {
       setLive(true);
       var known = {}, changed = l.length !== orders.length, ding = false;
       orders.forEach(function (o) { known[o.id] = o.status; });
