@@ -1,9 +1,9 @@
 // All /api/* routes. Runs as one Vercel serverless function, or under server.js locally.
 'use strict';
 const crypto = require('crypto');
-const { cmd } = require('../lib/store');
+const { cmd, env } = require('../lib/store');
 
-const ADMIN_PIN = String(process.env.ADMIN_PIN || '1234');
+const ADMIN_PIN = env('ADMIN_PIN') || '1234';
 const DEFAULT_MENU = [
   { id: 'tea', cat: 'hot', name: 'Tea', desc: 'Classic black tea', sugar: true, available: true },
   { id: 'milktea', cat: 'hot', name: 'Tea with milk', desc: 'Tea with hot milk', sugar: true, available: true },
