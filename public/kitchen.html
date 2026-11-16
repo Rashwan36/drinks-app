@@ -121,7 +121,7 @@
     $('list').innerHTML = list.map(function (o) {
       var m = minutes(o), cls = m >= 7 ? 'late' : m >= 3 ? 'warn' : '';
       return '<div class="order' + (freshIds[o.id] ? ' fresh' : '') + '">' +
-        '<div class="top"><div><div class="desk-label">Desk</div><div class="desk">' + esc(o.desk) + '</div></div>' +
+        '<div class="top"><div><div class="desk-label">Office</div><div class="desk">' + esc(o.desk) + '</div></div>' +
         '<div style="display:flex;flex-direction:column;align-items:flex-end;gap:6px"><span class="chip ' + cls + '">' + (m < 1 ? 'Just now' : m + ' min ago') + '</span><span class="no">Order #' + o.no + '</span></div></div>' +
         '<div class="items">' + o.items.map(function (it) {
           var d = [it.sugar, it.note].filter(Boolean).join(' · ') || 'No extras';
