@@ -76,8 +76,8 @@
 <div class="app">
   <header>
     <p class="eyebrow">Pantry</p>
-    <h1>What would you like today?</h1>
-    <p>Pick your drink, add your desk number, and we’ll bring it over.</p>
+    <h1>What would you like to drink?</h1>
+    <p>Pick your drink, add your office number, and we’ll bring it to you.</p>
   </header>
   <div class="pills" role="group" aria-label="Category">
     <button class="pill" type="button" data-cat="hot" aria-pressed="true">Hot drinks</button>
@@ -134,7 +134,7 @@
     <div style="flex:1;padding:8px 20px 20px;display:flex;flex-direction:column;gap:16px">
       <div class="box" id="cartLines"></div>
       <div class="box field" style="padding:16px">
-        <label class="label" for="desk" style="font-size:15px">Desk number</label>
+        <label class="label" for="desk" style="font-size:15px">Office number</label>
         <input class="big" id="desk" type="text" autocomplete="off" autocapitalize="characters" maxlength="10" placeholder="e.g. 12 or B-12">
         <p class="hint">We’ll remember it for next time — you can change it anytime.</p>
         <p class="error hidden" id="cartError" role="alert"></p>
@@ -254,7 +254,7 @@
   $('placeBtn').onclick = function () {
     var desk = $('desk').value.trim();
     if (!cart.length) return showError('Your order is empty — pick a drink first.');
-    if (!desk) return showError('Please enter your desk number so we can find you.');
+    if (!desk) return showError('Please enter your office number so we can find you.');
     var btn = this; btn.disabled = true; btn.textContent = 'Sending…';
     api('POST', '/api/orders', { desk: desk, items: cart.map(function (l) { return { id: l.id, qty: l.qty, sugar: l.sugar, note: l.note }; }) })
       .then(function (o) { store('desk', o.desk); store('orderId', o.id); cart = []; renderBar(); $('cartPage').classList.add('hidden'); showOrder(o); })
@@ -269,7 +269,7 @@
     var idx = STEPS.findIndex(function (s) { return s[0] === o.status; });
     var cancelled = o.status === 'cancelled';
     $('trackTitle').textContent = cancelled ? 'Order cancelled' : o.status === 'done' ? 'Enjoy your drink!' : o.status === 'ready' ? 'Your order is on its way' : 'Your order is in the kitchen';
-    $('trackSub').textContent = 'Order #' + o.no + ' · Desk ' + o.desk;
+    $('trackSub').textContent = 'Order #' + o.no + ' · Office ' + o.desk;
     $('steps').classList.toggle('hidden', cancelled);
     $('steps').innerHTML = STEPS.map(function (s, i) { return '<div class="step ' + (i < idx ? 'past' : i === idx ? 'now' : '') + '"><span class="dot"></span>' + s[1] + '</div>'; }).join('');
     $('cancelBtn').classList.toggle('hidden', o.status !== 'new');
