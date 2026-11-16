@@ -89,7 +89,7 @@ async function route(req, res, p) {
 
   if (p === 'orders' && m === 'POST') {
     const body = await readBody(req);
-    const desk = toWesternDigits(body.desk).replace(/\D/g, '').slice(0, 6);
+    const desk = toWesternDigits(body.desk).replace(/[^A-Za-z0-9ء-ي \-]/g, '').replace(/\s+/g, ' ').trim().toUpperCase().slice(0, 10);
     if (!desk) return send(res, 400, { error: 'Please enter your desk number.' });
     const lines = Array.isArray(body.items) ? body.items.slice(0, 20) : [];
     if (!lines.length) return send(res, 400, { error: 'Your order is empty.' });
