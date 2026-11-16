@@ -6,7 +6,7 @@ const fs = require('fs');
 const path = require('path');
 const os = require('os');
 const api = require('./api/index');
-const { remote } = require('./lib/store');
+const { remote, env } = require('./lib/store');
 
 const PORT = Number(process.env.PORT) || 3000;
 const PUBLIC_DIR = path.join(__dirname, 'public');
@@ -31,5 +31,7 @@ http.createServer((req, res) => {
     console.log(`  Kitchen:           http://${ip}:${PORT}/kitchen`);
     console.log(`  Admin:             http://${ip}:${PORT}/admin\n`);
   }
-  if (!process.env.ADMIN_PIN) console.log('  ⚠  Admin PIN is the default 1234 — set ADMIN_PIN to change it.\n');
+  // Setting names only (never values), to help spot a mistyped name.
+  console.log('  Settings found: ' + (Object.keys(process.env).filter(k => /UPSTASH|ADMIN|KV_REST/i.test(k)).map(k => JSON.stringify(k)).join(', ') || 'none') + '\n');
+  if (!env('ADMIN_PIN')) console.log('  ⚠  Admin PIN is the default 1234 — set ADMIN_PIN to change it.\n');
 });
