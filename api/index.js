@@ -139,7 +139,7 @@ async function route(req, res, p) {
   if (p === 'orders' && m === 'POST') {
     const body = await readBody(req);
     const desk = toWesternDigits(body.desk).replace(/[^A-Za-z0-9ء-ي \-]/g, '').replace(/\s+/g, ' ').trim().toUpperCase().slice(0, 10);
-    if (!desk) return send(res, 400, { error: 'Please enter your desk number.' });
+    if (!desk) return send(res, 400, { error: 'Please enter your office number.' });
     const lines = Array.isArray(body.items) ? body.items.slice(0, 20) : [];
     if (!lines.length) return send(res, 400, { error: 'Your order is empty.' });
     const menu = await getMenu();
@@ -165,15 +165,14 @@ async function route(req, res, p) {
   if ((match = p.match(/^orders\/([a-f0-9]{16})$/))) {
     const order = await getOrder(match[1]);
     if (!order) return send(res, 404, { error: 'Order not found' });
-    if (m === 'GET') recordStatus(order);
-      return send(res, 200, order);
+    if (m === 'GET') return send(res, 200, order);
     if (m === 'PATCH') {
       const to = (await readBody(req)).status;
       if (NEXT[order.status] !== to && !(to === 'cancelled' && ACTIVE.includes(order.status))) return send(res, 409, { error: 'Invalid status change' });
       order.status = to; order.updatedAt = Date.now();
       await putOrder(order);
       recordStatus(order);
-    return send(res, 200, order);
+      return send(res, 200, order);
     }
   }
   if ((match = p.match(/^orders\/([a-f0-9]{16})\/cancel$/)) && m === 'POST') {
@@ -182,6 +181,7 @@ async function route(req, res, p) {
     if (order.status !== 'new') return send(res, 409, { error: 'The kitchen already started on this order.' });
     order.status = 'cancelled'; order.updatedAt = Date.now();
     await putOrder(order);
+    recordStatus(order);
     return send(res, 200, order);
   }
 
