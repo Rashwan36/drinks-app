@@ -1,7 +1,7 @@
 // All /api/* routes. Runs as one Vercel serverless function, or under server.js locally.
 'use strict';
 const crypto = require('crypto');
-const { cmd, env } = require('../lib/store');
+const { cmd, pipeline, env } = require('../lib/store');
 
 const ADMIN_PIN = env('ADMIN_PIN') || '1234';
 const DEFAULT_MENU = [
@@ -43,6 +43,55 @@ async function putOrder(o) {
   // finished orders leave the kitchen list but stay readable for a day
   await cmd('SET', 'order:' + o.id, JSON.stringify(o), 'EX', 86400);
   return cmd('HDEL', 'orders', o.id);
+}
+
+// ---------- dashboard stats ----------
+// One hash per local day: drinks:stats:<YYYY-MM-DD>. Counting starts from the day this was deployed.
+const TZ_MS = (Number(env('TZ_OFFSET_HOURS')) || 3) * 36e5; // Riyadh = UTC+3
+function localDay(ts) { return new Date(ts + TZ_MS).toISOString().slice(0, 10); }
+function localHour(ts) { return new Date(ts + TZ_MS).getUTCHours(); }
+const statsKey = ts => 'stats:' + localDay(ts);
+function bump(fields, ts) {
+  const key = statsKey(ts || Date.now());
+  const list = Object.entries(fields).filter(([, n]) => n).map(([f, n]) => ['HINCRBY', key, f, Math.round(n)]);
+  list.push(['EXPIRE', key, 40 * 86400]);
+  // Stats must never break ordering: fire and forget.
+  pipeline(list).catch(err => console.error('stats:', err.message));
+}
+function recordCreated(o) {
+  const f = { orders: 1, cups: 0, ['h:' + localHour(o.createdAt)]: 1, ['k:' + o.desk]: 1 };
+  for (const it of o.items) {
+    f.cups += it.qty;
+    f['d:' + it.name] = (f['d:' + it.name] || 0) + it.qty;
+    if (it.sugar) f['s:' + it.sugar] = (f['s:' + it.sugar] || 0) + it.qty;
+  }
+  bump(f, o.createdAt);
+}
+function recordStatus(o) {
+  const now = Date.now(), age = now - o.createdAt;
+  if (o.status === 'cancelled') bump({ cancelled: 1 }, o.createdAt);
+  if (o.status === 'ready') bump({ ready_ms: age, ready_n: 1 }, o.createdAt);
+  if (o.status === 'done') bump({ delivered: 1, done_ms: age, done_n: 1 }, o.createdAt);
+}
+function parseStats(flat) {
+  const out = { orders: 0, cups: 0, cancelled: 0, delivered: 0, ready_ms: 0, ready_n: 0, done_ms: 0, done_n: 0, drinks: {}, hours: {}, desks: {}, sugar: {} };
+  const map = { 'd:': 'drinks', 'h:': 'hours', 'k:': 'desks', 's:': 'sugar' };
+  for (let i = 0; i < (flat || []).length; i += 2) {
+    const k = flat[i], n = Number(flat[i + 1]) || 0, pre = k.slice(0, 2);
+    if (map[pre]) out[map[pre]][k.slice(2)] = n; else if (k in out) out[k] = n;
+  }
+  return out;
+}
+// Kitchen screens that polled in the last 45 s (kept in memory: costs no database commands).
+const kitchens = new Map();
+const KITCHEN_LIVE_MS = 45000;
+function seenKitchen(req) {
+  const id = String(req.headers['x-kitchen-id'] || '').replace(/[^a-z0-9]/gi, '').slice(0, 24);
+  if (!id) return;
+  const now = Date.now();
+  const k = kitchens.get(id) || { first: now };
+  k.seen = now; kitchens.set(id, k);
+  if (kitchens.size > 200) for (const [kid, v] of kitchens) if (now - v.seen > 86400000) kitchens.delete(kid);
 }
 
 // ---------- helpers ----------
@@ -107,21 +156,24 @@ async function route(req, res, p) {
     if (no === 1) await cmd('EXPIRE', counterKey, 172800);
     const order = { id: crypto.randomBytes(8).toString('hex'), no: Number(no), desk, items, status: 'new', createdAt: Date.now(), updatedAt: Date.now() };
     await putOrder(order);
+    recordCreated(order);
     return send(res, 201, order);
   }
 
-  if (p === 'orders' && m === 'GET') return send(res, 200, await activeOrders());
+  if (p === 'orders' && m === 'GET') { seenKitchen(req); return send(res, 200, await activeOrders()); }
 
   if ((match = p.match(/^orders\/([a-f0-9]{16})$/))) {
     const order = await getOrder(match[1]);
     if (!order) return send(res, 404, { error: 'Order not found' });
-    if (m === 'GET') return send(res, 200, order);
+    if (m === 'GET') recordStatus(order);
+      return send(res, 200, order);
     if (m === 'PATCH') {
       const to = (await readBody(req)).status;
       if (NEXT[order.status] !== to && !(to === 'cancelled' && ACTIVE.includes(order.status))) return send(res, 409, { error: 'Invalid status change' });
       order.status = to; order.updatedAt = Date.now();
       await putOrder(order);
-      return send(res, 200, order);
+      recordStatus(order);
+    return send(res, 200, order);
     }
   }
   if ((match = p.match(/^orders\/([a-f0-9]{16})\/cancel$/)) && m === 'POST') {
@@ -143,6 +195,26 @@ async function route(req, res, p) {
     if (!isAdmin(req)) return send(res, 401, { error: 'سجّل دخول الأول' });
     const menu = await getMenu();
     if (p === 'admin/menu' && m === 'GET') return send(res, 200, menu.map(publicItem));
+    if (p === 'admin/stats' && m === 'GET') {
+      const days = Math.min(30, Math.max(1, parseInt(new URL(req.url, 'http://x').searchParams.get('days'), 10) || 7));
+      const now = Date.now(), dates = [];
+      for (let i = 0; i < days; i++) dates.push(localDay(now - i * 864e5));
+      const res2 = await pipeline([['HGETALL', 'orders'], ...dates.map(d => ['HGETALL', 'stats:' + d])]);
+      const active = [];
+      for (let i = 1; i < (res2[0] || []).length; i += 2) active.push(JSON.parse(res2[0][i]));
+      const live = [...kitchens.values()].filter(k => now - k.seen < KITCHEN_LIVE_MS);
+      return send(res, 200, {
+        now, today: dates[0],
+        days: dates.map((d, i) => Object.assign({ date: d }, parseStats(res2[i + 1]))),
+        active: {
+          new: active.filter(o => o.status === 'new').length,
+          prep: active.filter(o => o.status === 'prep').length,
+          ready: active.filter(o => o.status === 'ready').length,
+          oldestWaitMs: active.length ? now - Math.min(...active.filter(o => o.status !== 'ready').map(o => o.createdAt).concat(now)) : 0
+        },
+        kitchens: { open: live.length, lastSeenMs: kitchens.size ? now - Math.max(...[...kitchens.values()].map(k => k.seen)) : null }
+      });
+    }
     if (p === 'admin/items' && m === 'POST') {
       const v = validItem(await readBody(req));
       if (v.error) return send(res, 400, { error: v.error });
